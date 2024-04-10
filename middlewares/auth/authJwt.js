@@ -1,8 +1,13 @@
-import jwt from 'jsonwebtoken';
+import jwt, {TokenExpiredError} from 'jsonwebtoken';
 
 import authConfig from './configs/auth.config.js';
 
-import {Trader} from './models';
+function catchError(err, res) { 
+    if (err instanceof TokenExpiredError) {
+        return res.status(401).json({error: "Unauthorized! Access Token was expired!"});    
+    }
+    return res.status(401).json({error: "Unauthorized!"});
+}
 
 export function verifyToken(req, res, next) {
     let token = req.headers['x-access-token'];
@@ -15,9 +20,7 @@ export function verifyToken(req, res, next) {
 
     jwt.verify(token, authConfig.secret, (err, decoded) => {
         if (err) {
-            return res.status(401).send({
-                error: 'Unauthorized!'
-            });
+            return catchError(err, res)
         }
         req.userId = decoded.id;
         next()

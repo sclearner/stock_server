@@ -13,11 +13,15 @@ export function checkDuplicate(req, res, next) {
             email: req.body.email,
         }
     }).then(user => {
-        if (user) res.status(400).json({
+        if (user) {res.status(400).json({
             'error': 'Email is already in use!'
         })
         return ;
+        }
+        next();  
     })
+}
 
-    next();
+export function checkEmail(req, res, next) {
+    
 }

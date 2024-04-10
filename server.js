@@ -1,8 +1,9 @@
-import express from 'express';
-import cors from 'cors';
-import { db } from './models/index.js';
-import {authRouter} from './routes/auth.route.js';
-import endPoints from 'express-list-endpoints';
+import express from "express";
+import cors from "cors";
+import { db } from "./models/index.js";
+import { authRouter } from "./routes/auth.route.js";
+import { execSync } from "child_process";
+import endPoints from "express-list-endpoints";
 
 const app = express();
 
@@ -13,20 +14,30 @@ app.use(cors());
 app.use(express.json());
 
 //parse requests of content type 'application/x-www-form-urlencoded'
-app.use(express.urlencoded({extended: true}));
+app.use(express.urlencoded({ extended: true }));
 
 //Authenticate database
-db.sequelize
-.authenticate()
-.then(() => {
-    console.log('Connection has been established successfully.');
-})
-.catch(err => {
-    console.error('Unable to connect to the database:', err);
-});
-app.use('/api/v1/auth', authRouter)
+let dbAuthTry = 0;
+async function dbAuth() {
+  await db.sequelize
+    .authenticate()
+    .then(() => {
+      console.log("Connection has been established successfully.");
+    })
+    .catch(async (err) => {
+      execSync("pg_ctl restart");
+      if (dbAuthTry++ < 5) {
+        console.log(`Retry time: ${dbAuthTry}`);
+        dbAuth();
+      }
+      console.error("Unable to connect to the database:", err);
+    });
+}
 
-const PORT = process.env.PORT || 8080
+dbAuth();
+app.use("/api/v1/auth", authRouter);
+
+const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}.`)
+  console.log(`Server is running on port ${PORT}.`);
 });
