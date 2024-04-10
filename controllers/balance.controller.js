@@ -6,7 +6,7 @@ export async function getTraderBalance(req, res) {
     const findConfig = {
         raw: true,
         where: {
-            id: req.traderId
+            id: req.params.id || req.traderId
         },
         include: [{
             model: Instrument,
@@ -24,7 +24,8 @@ export async function getTraderBalance(req, res) {
 
     try {
         const trader = await Trader.findOne(findConfig)
-        res.status(200).json(trader)
+        if (trader) res.status(200).json(trader)
+        else res.status(404).json({error: 'Trader not found'})
     }
     catch (err) {
         res.status(404).json({error: err.message})
