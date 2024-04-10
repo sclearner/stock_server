@@ -6,11 +6,7 @@ import authConfig from '../configs/auth.config.js';
 const Op = Sequelize.Op;
 
 export function signup(req, res) {
-    Trader.create({
-        name: req.body.name,
-        email: req.body.email,
-        password: bcrypt.hashSync(req.body.password, 8)
-    }).then(
+    req.trader.save().then(
         _user => {
             res.json({message: "Trader was successfully registered"})
         }
