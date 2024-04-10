@@ -19,25 +19,25 @@ app.use(express.urlencoded({ extended: true }));
 //Authenticate database
 let dbAuthTry = 0;
 async function dbAuth() {
+  console.log(`Connecting try: ${dbAuthTry + 1}`);  
   await db.sequelize
     .authenticate()
     .then(() => {
       console.log("Connection has been established successfully.");
     })
     .catch(async (err) => {
-      execSync("pg_ctl restart");
+      console.log(execSync("pg_ctl restart"));
       if (dbAuthTry++ < 5) {
-        console.log(`Retry time: ${dbAuthTry}`);
-        dbAuth();
+        await dbAuth();
       }
       console.error("Unable to connect to the database:", err);
     });
 }
 
-dbAuth();
+await dbAuth();
 app.use("/api/v1/auth", authRouter);
 
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}.`);
+  console.log(`Server is running on http://localhost:${PORT}`);
 });
