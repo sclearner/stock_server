@@ -56,7 +56,20 @@ db.Trader.belongsToMany(db.Instrument, {
 // Hooks
 db.Trader.afterCreate(
     async (trader, _options) => {
+        const currencies = await db.Instrument.findAll({
+            raw: true,
+            where: {
+                currency: null
+            },
+            attributes: ['symbol']
+        })
         
+        for (const currency of currencies) {
+            TraderBalance.create({
+                id: trader.id,
+                currency: currency.symbol,
+            })
+        }
     }
 )
 
