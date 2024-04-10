@@ -1,10 +1,9 @@
-import {Trader, Sequelize, RefreshToken} from '../models/index.js';
+import {db} from '../models/index.js';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import authConfig from '../configs/auth.config.js';
 
-const Op = Sequelize.Op;
-
+const {Trader, RefreshToken} = db;
 export function signup(req, res) {
     req.trader.save().then(
         _user => {
@@ -19,7 +18,7 @@ export function signin(req, res) {
     Trader.findOne({
         where: {
             name: req.body.name
-        }
+        },
     })
     .then(async trader => {
         if (!trader) return res.status(404).json({
@@ -45,7 +44,7 @@ export function signin(req, res) {
         });
 
         const refreshToken = await RefreshToken.createToken(trader);
-
+        
         res.status(200).json({
             id: trader.id,
             name: trader.name,

@@ -1,6 +1,7 @@
-import { Trader } from "../../models/index.js";
+import { db } from "../../models/index.js";
 import bcrypt from "bcryptjs";
 
+const {Trader} = db;
 /**
  * Middleware for checking the existence of given
  * emails in req.body.email of POST '/api/signup'

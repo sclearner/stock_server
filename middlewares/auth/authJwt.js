@@ -1,6 +1,6 @@
-import jwt, {TokenExpiredError} from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
 
-import authConfig from './configs/auth.config.js';
+import authConfig from '../../configs/auth.config.js';
 
 function catchError(err, res) { 
     if (err instanceof TokenExpiredError) {
@@ -22,7 +22,7 @@ export function verifyToken(req, res, next) {
         if (err) {
             return catchError(err, res)
         }
-        req.userId = decoded.id;
+        req.traderId = decoded.id;
         next()
     })
 }

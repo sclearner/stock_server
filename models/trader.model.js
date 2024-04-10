@@ -1,6 +1,4 @@
-import { validate } from "uuid";
 import roleConfig from "../configs/role.config.js";
-import bcrypt from "bcryptjs"
 
 export default function (sequelize, DataTypes) {
   return sequelize.define("trader", {

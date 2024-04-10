@@ -4,6 +4,7 @@ import {Sequelize, DataTypes} from 'sequelize';
 import TraderModel from './trader.model.js';
 import { RefreshTokenModel } from './refreshToken.model.js';
 import { InstrumentModel } from './instrument.model.js';
+import { TraderBalanceModel } from './trader-balance.model.js';
 
 const sequelize = new Sequelize(
     config.DB,
@@ -19,14 +20,17 @@ const sequelize = new Sequelize(
 const Trader = TraderModel(sequelize, DataTypes);
 const RefreshToken = RefreshTokenModel(sequelize, DataTypes);
 const Instrument = InstrumentModel(sequelize, DataTypes);
+const TraderBalance = TraderBalanceModel(sequelize, DataTypes);
 class db {
     static sequelize = sequelize
     static Sequelize = Sequelize
     static Trader = Trader
     static RefreshToken = RefreshToken
     static Instrument = Instrument
+    static TraderBalance = TraderBalance
 }
 
+//Relations
 db.RefreshToken.belongsTo(db.Trader, {
     foreignKey: 'traderId', targetKey: 'id'
 });
@@ -36,11 +40,24 @@ db.Trader.hasOne(db.RefreshToken, {
 })
 
 db.Instrument.belongsToMany(db.Trader, {
-    through: 'trader_balance'
+    through: db.TraderBalance,
+    foreignKey: 'id',
+    otherKey: 'currency',
+    timestamps: false
 })
 
-// db.Trader.afterInsert(
+db.Trader.belongsToMany(db.Instrument, {
+    through: db.TraderBalance,
+    foreignKey: 'id',
+    otherKey: 'currency',
+    timestamps: false
+})
 
-// )
+// Hooks
+db.Trader.afterCreate(
+    async (trader, _options) => {
+        
+    }
+)
 
-export {db, Sequelize, Trader, RefreshToken, Instrument}
+export {db}
