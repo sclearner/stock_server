@@ -23,7 +23,7 @@ export async function getTraderBalance(req, res) {
     }
 
     try {
-        const trader = await Trader.findOne(findConfig)
+        const trader = await Trader.findAll(findConfig)
         if (trader) res.status(200).json(trader)
         else res.status(404).json({error: 'Trader not found'})
     }
