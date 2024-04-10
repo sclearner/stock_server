@@ -7,8 +7,10 @@ import util from "util";
 import endPoints from "express-list-endpoints";
 import { TraderRouter } from "./routes/trader.route.js";
 
+console.clear();
+
 const app = express();
-const execPromise = util.promisify(exec)
+const execPromise = util.promisify(exec);
 
 // Middleware
 app.use(cors());
@@ -23,7 +25,7 @@ app.use(express.urlencoded({ extended: true }));
 let dbAuthTry = 0;
 let retryFunction;
 async function dbAuth() {
-  console.log(`Connecting try: ${dbAuthTry + 1}`);
+  console.log(`Connect try: ${dbAuthTry + 1}`);
   await db.sequelize
     .authenticate()
     .then(() => {
@@ -49,8 +51,14 @@ retryFunction = async (err) => {
 await dbAuth();
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/trader", TraderRouter);
-console.log(endPoints(app));
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
+  console.log("------------------ API List -------------------")
+  console.log(
+    endPoints(app)
+    .map((e) => e.methods.map((f) => `${f}: ${e.path}`).join("\n"))
+    .join("\n\n")
+);
 });
+
