@@ -19,6 +19,7 @@ export function signin(req, res) {
         where: {
             name: req.body.name
         },
+        attributes: ['id', 'password']
     })
     .then(async trader => {
         if (!trader) return res.status(404).json({
@@ -46,9 +47,6 @@ export function signin(req, res) {
         const refreshToken = await RefreshToken.createToken(trader);
         
         res.status(200).json({
-            id: trader.id,
-            name: trader.name,
-            email: trader.email,
             accessToken: token,
             refreshToken: refreshToken
         })
