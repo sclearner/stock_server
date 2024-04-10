@@ -83,9 +83,7 @@ export async function refreshToken(req, res) {
 
             return res.status(403).json({error: 'Refresh Token was expired'})
         }    
-        const trader = await Trader.findOne({
-            where: {id: refreshToken.traderId}
-        })
+        const trader = refreshToken.getTrader()
 
         let newAccessToken = jwt.sign({id: trader.id}, authConfig.secret, {
             expiresIn: authConfig.jwtExpiration,
