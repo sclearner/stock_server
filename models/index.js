@@ -48,27 +48,28 @@ db.Instrument.belongsToMany(db.Trader, {
 
 db.Trader.belongsToMany(db.Instrument, {
     through: db.TraderBalance,
-    foreignKey: 'id',
-    otherKey: 'currency',
+    foreignKey: 'currency',
+    otherKey: 'id',
     timestamps: false
 })
 
 // Hooks
 db.Trader.afterCreate(
-    async (trader, _options) => {
-        const currencies = await db.Instrument.findAll({
+    async (trader, options) => {
+        const {transaction} = options
+        const currencies = (await db.Instrument.findAll({
             raw: true,
             where: {
                 currency: null
             },
             attributes: ['symbol']
-        })
+        })).map(e => e.symbol)
         
-        for (const currency of currencies) {
-            TraderBalance.create({
+        for (const c of currencies) {
+            await db.TraderBalance.create({
                 id: trader.id,
-                currency: currency.symbol,
-            })
+                currency: c,
+            }, {transaction})
         }
     }
 )

@@ -3,15 +3,41 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import authConfig from '../configs/auth.config.js';
 
-const {Trader, RefreshToken} = db;
-export function signup(req, res) {
+const {Trader, RefreshToken, Instrument, TraderBalance, sequelize} = db;
+export function signUpClient(req, res) {
     req.trader.save().then(
         _user => {
-            res.json({message: "Trader was successfully registered"})
+            res.status(201).json({message: "Trader was successfully registered"})
         }
     ).catch(err => {
-        res.status(500).send({message: err.message});
+        res.status(500).send({error: err.message});
     })
+}
+
+export async function signUpCorp(req, res) {
+    req.trader.role = 'CORP';
+    const {symbol, amount, initPrice} = req.body;
+    
+    try {
+        await sequelize.transaction(async (t) => {
+            await req.trader.save({transaction: t});
+            await Instrument.create({
+                symbol, 
+                currency: 'VND',
+                last_price: initPrice || 10000
+            }, {transaction: t});
+            await TraderBalance.create({
+                id: req.trader.id,
+                currency: symbol,
+                amount: amount
+            }, {transaction: t});
+        });
+
+        res.status(201).json({message: "Corporation was created successfully!"})
+    }
+    catch (err) {
+        res.status(500).json({error: err.message});
+    }
 }
 
 export function signin(req, res) {

@@ -17,6 +17,6 @@ export default function (sequelize, DataTypes) {
     role: {
       type: DataTypes.ENUM(...roleConfig.roles),
       defaultValue: roleConfig.defaultValue,
-    }
+    },
   });
 }
