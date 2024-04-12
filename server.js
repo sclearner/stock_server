@@ -5,7 +5,8 @@ import { authRouter } from "./routes/auth.route.js";
 import { exec } from "child_process";
 import util from "util";
 import endPoints from "express-list-endpoints";
-import { TraderRouter } from "./routes/trader.route.js";
+import { TraderRouter as traderRouter } from "./routes/trader.route.js";
+import { instrumentRouter } from "./routes/instrument.route.js";
 
 console.clear();
 
@@ -50,7 +51,8 @@ retryFunction = async (err) => {
 
 await dbAuth();
 app.use("/api/v1/auth", authRouter);
-app.use("/api/v1/trader", TraderRouter);
+app.use("/api/v1/trader", traderRouter);
+app.use("/api/v1/instrument", instrumentRouter);
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);

@@ -41,15 +41,15 @@ db.Trader.hasOne(db.RefreshToken, {
 
 db.Instrument.belongsToMany(db.Trader, {
     through: db.TraderBalance,
-    foreignKey: 'id',
-    otherKey: 'currency',
+    foreignKey: 'currency',
+    otherKey: 'id',
     timestamps: false
 })
 
 db.Trader.belongsToMany(db.Instrument, {
     through: db.TraderBalance,
-    foreignKey: 'currency',
-    otherKey: 'id',
+    foreignKey: 'id',
+    otherKey: 'currency',
     timestamps: false
 })
 

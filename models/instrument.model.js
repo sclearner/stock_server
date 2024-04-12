@@ -12,8 +12,6 @@ export function InstrumentModel(sequelize, DataTypes) {
             type: DataTypes.DECIMAL(20, 2),
             allowNull: true
         }
-    }, {
-        updatedAt: false
     }
     )
 
