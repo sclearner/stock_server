@@ -7,6 +7,7 @@ import util from "util";
 import endPoints from "express-list-endpoints";
 import { TraderRouter as traderRouter } from "./routes/trader.route.js";
 import { instrumentRouter } from "./routes/instrument.route.js";
+import { orderRouter } from "./routes/ordet.route.js";
 
 console.clear();
 
@@ -53,6 +54,7 @@ await dbAuth();
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/trader", traderRouter);
 app.use("/api/v1/instrument", instrumentRouter);
+app.use("/api/v1/order", orderRouter);
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);

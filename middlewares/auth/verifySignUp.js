@@ -26,7 +26,7 @@ export function checkDuplicate(req, res, next) {
   });
 }
 
-export async function validate(req, res, next) {
+export async function validateTrader(req, res, next) {
   try {
     if (req.body.password.length < 8) throw new Error("Password must be at least 8 characters");
     const trader = new Trader({
