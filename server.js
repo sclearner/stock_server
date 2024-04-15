@@ -7,7 +7,7 @@ import util from "util";
 import endPoints from "express-list-endpoints";
 import { TraderRouter as traderRouter } from "./routes/trader.route.js";
 import { instrumentRouter } from "./routes/instrument.route.js";
-import { orderRouter } from "./routes/ordet.route.js";
+import { orderRouter } from "./routes/order.route.js";
 
 console.clear();
 

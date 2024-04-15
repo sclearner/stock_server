@@ -4,7 +4,6 @@ export async function createOrder(req, res) {
   req.order
     .save({ transaction: req.transaction })
     .then((_order) => {
-      req.transaction.commit();
       res.status(201).json({ message: "Order created" });
     })
     .catch((err) => {

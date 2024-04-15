@@ -2,6 +2,7 @@ import {db} from '../models/index.js';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import authConfig from '../configs/auth.config.js';
+import currencyConfig from '../configs/currency.config.js';
 
 const {Trader, RefreshToken, Instrument, TraderBalance, sequelize} = db;
 export function signUpClient(req, res) {
@@ -23,7 +24,7 @@ export async function signUpCorp(req, res) {
             await req.trader.save({transaction: t});
             await Instrument.create({
                 symbol, 
-                currency: 'VND',
+                currency: currencyConfig.defaultCurrency,
                 last_price: initPrice || 10000
             }, {transaction: t});
             await TraderBalance.create({
