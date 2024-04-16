@@ -8,11 +8,20 @@ import endPoints from "express-list-endpoints";
 import { TraderRouter as traderRouter } from "./routes/trader.route.js";
 import { instrumentRouter } from "./routes/instrument.route.js";
 import { orderRouter } from "./routes/order.route.js";
+import currencyConfig from "./configs/currency.config.js";
 
 console.clear();
 
 const app = express();
 const execPromise = util.promisify(exec);
+
+let timeLeft = 0;
+const checkDay = setInterval(
+  async () => {
+    const updateAt = new Date(await db.sequelize.query('SELECT "updatedAt" FROM time'));
+  }, 24 * 60 * 60 * 1000
+)
+
 
 // Middleware
 app.use(cors());

@@ -52,7 +52,6 @@ export async function recharge(req, res) {
             },
             limit: 1
         });
-        console.log(traderBalance)
         await traderBalance.increment('amount', {by: amount});
         res.status(200).json(traderBalance)
     }

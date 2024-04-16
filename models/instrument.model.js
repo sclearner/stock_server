@@ -8,11 +8,14 @@ export function InstrumentModel(sequelize, DataTypes) {
             type: DataTypes.STRING,
             allowNull: true
         },
-        last_price: {
+        dayPrice: {
             type: DataTypes.DECIMAL(20, 2),
             allowNull: true
-        }
-    }
+        },
+        currentPrice: {
+            type: DataTypes.DECIMAL(20, 2),
+            allowNull: true
+        }}
     )
 
     return Instrument

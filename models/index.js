@@ -6,8 +6,10 @@ import { RefreshTokenModel } from "./refreshToken.model.js";
 import { InstrumentModel } from "./instrument.model.js";
 import { TraderBalanceModel } from "./trader-balance.model.js";
 import OrderModel from "./order.model.js";
-import orderConfig from "../configs/order.config.js";
-import currencyConfig from "../configs/currency.config.js";
+import { TradeModel } from "./trade.model.js";
+import { orderHooks } from "./hooks/order.hook.js";
+import { traderHooks } from "./hooks/trader.hook.js";
+import { tradeHooks } from "./hooks/trade.hook.js";
 const sequelize = new Sequelize(config.DB, config.USER, config.PASSWORD, {
   host: config.HOST,
   dialect: config.dialect,
@@ -19,6 +21,7 @@ const RefreshToken = RefreshTokenModel(sequelize, DataTypes);
 const Instrument = InstrumentModel(sequelize, DataTypes);
 const TraderBalance = TraderBalanceModel(sequelize, DataTypes);
 const Order = OrderModel(sequelize, DataTypes);
+const Trade = TradeModel(sequelize, DataTypes);
 class db {
   static sequelize = sequelize;
   static Sequelize = Sequelize;
@@ -27,6 +30,7 @@ class db {
   static Instrument = Instrument;
   static TraderBalance = TraderBalance;
   static Order = Order;
+  static Trade = Trade;
 }
 
 //Relations
@@ -73,89 +77,20 @@ db.Instrument.hasMany(db.Order, {
   foreignKey: "currency",
   targetKey: "symbol",
 });
-// Hooks
-db.Trader.afterCreate(async (trader, options) => {
-  const { transaction } = options;
-  const currencies = (
-    await db.Instrument.findAll({
-      raw: true,
-      where: {
-        currency: null,
-      },
-      attributes: ["symbol"],
-    })
-  ).map((e) => e.symbol);
 
-  for (const c of currencies) {
-    await db.TraderBalance.create(
-      {
-        id: trader.id,
-        currency: c,
-      },
-      { transaction }
-    );
-  }
+db.Trade.belongsTo(db.Order, {
+  foreignKey: "askId",
+  targetKey: "id"
 });
 
-//Trigger of Orders
-async function isValidPrice(order) {
-  const { price, createdAt } = await db.Instrument.findByPk(order.currency, {
-    raw: true,
-    attributes: [["last_price", "price"], "createdAt"],
-  }).catch((_err) => ({ price: null, createdAt: null }));
-  if (order.price === null) {
-    order.price = price;
-    return;
-  }
-  if (price === null) throw new Error("Invalid price");
-  const newCorpStockDate = createdAt;
-  newCorpStockDate.setDate(
-    createdAt.getDate() + orderConfig.newStockDurationDays
-  );
-  const rangePrice =
-    newCorpStockDate > new Date()
-      ? orderConfig.newStockRange
-      : orderConfig.range;
-  if (
-    (1 - rangePrice) * price > order.price ||
-    order.price > (1 + rangePrice) * price
-  ) {
-    throw new Error("Price out of range!");
-  }
-  const forTick = Math.abs(order.price - price);
-  if (Math.floor(forTick / orderConfig.tick) * orderConfig.tick !== forTick) {
-    throw new Error("Invalid price, need to be tickle!");
-  }
-}
+db.Trade.belongsTo(db.Order, {
+  foreignKey: "bidId",
+  targetKey: "id"
+});
 
-db.Order.beforeCreate(isValidPrice);
-
-async function payForOrder(order, options) {
-  const transaction = options.transaction;
-  try {
-    let currency, decrement;
-    if (order.isAsk) {
-        currency = currencyConfig.defaultCurrency;
-        decrement = order.price * order.amount;
-    }
-    else {
-        currency = order.currency;
-        decrement = order.amount;
-    }
-    await db.TraderBalance.decrement(["amount"], {
-        by: decrement,
-        where: {
-          id: order.traderId,
-          currency
-        },
-        transaction,
-     });
-    transaction.commit();
-  } catch (err) {
-    transaction.rollback();
-    throw err;
-  }
-}
-db.Order.afterCreate(payForOrder);
+//Hook
+traderHooks();
+orderHooks();
+tradeHooks();
 
 export { db };
