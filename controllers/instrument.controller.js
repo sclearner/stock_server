@@ -10,7 +10,7 @@ export async function getInstruments(req, res) {
     },
     limit,
     offset,
-    attributes: ['symbol', 'currency', 'last_price']
+    attributes: ['symbol', 'currency', 'dayPrice']
   })
     .then((result) => {
       res.status(200).json(result); 

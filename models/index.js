@@ -13,7 +13,7 @@ import { tradeHooks } from "./hooks/trade.hook.js";
 const sequelize = new Sequelize(config.DB, config.USER, config.PASSWORD, {
   host: config.HOST,
   dialect: config.dialect,
-  // logging: false
+  logging: false
 });
 
 const Trader = TraderModel(sequelize, DataTypes);

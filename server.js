@@ -1,5 +1,8 @@
 import express from "express";
 import cors from "cors";
+import os from "os";
+import { resolve } from "path";
+import cluster from "cluster";
 import { db } from "./models/index.js";
 import { authRouter } from "./routes/auth.route.js";
 import { exec } from "child_process";
@@ -8,9 +11,21 @@ import endPoints from "express-list-endpoints";
 import { TraderRouter as traderRouter } from "./routes/trader.route.js";
 import { instrumentRouter } from "./routes/instrument.route.js";
 import { orderRouter } from "./routes/order.route.js";
-import currencyConfig from "./configs/currency.config.js";
+
 
 console.clear();
+
+if (cluster.isPrimary) {
+  for (let i=0; i < os.cpus().length; i++) {
+    cluster.fork();
+  }
+
+  cluster.on('exit', (worker, code, signal) => {
+    console.log(`Worker process ${worker.process.pid} died. Restarting...`);
+    cluster.fork();
+  });
+}
+else {
 
 const app = express();
 const execPromise = util.promisify(exec);
@@ -32,16 +47,15 @@ app.use(express.json());
 //parse requests of content type 'application/x-www-form-urlencoded'
 app.use(express.urlencoded({ extended: true }));
 
+//Frontend
+app.use(express.static('public'));
+
 //Authenticate database
 let dbAuthTry = 0;
 let retryFunction;
 async function dbAuth() {
-  console.log(`Connect try: ${dbAuthTry + 1}`);
   await db.sequelize
     .authenticate()
-    .then(() => {
-      console.log("Connection has been established successfully.");
-    })
     .catch(retryFunction);
 }
 
@@ -54,12 +68,23 @@ retryFunction = async (err) => {
       if (dbAuthTry++ < 5) {
         retryFunction(err);
       } else {
-        console.error("Unable to connect to the database:", err);
+
       }
     });
 };
 
 await dbAuth();
+
+app.get('/', (req, res) => {
+  res.sendFile(resolve('index.html'));
+})
+
+app.get('/api/test', (req, res) => {
+  let i = 0;
+  for (; i < 50_000_000; i++);
+  res.json({i});
+});
+
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/trader", traderRouter);
 app.use("/api/v1/instrument", instrumentRouter);
@@ -75,3 +100,4 @@ app.listen(PORT, () => {
 );
 });
 
+}

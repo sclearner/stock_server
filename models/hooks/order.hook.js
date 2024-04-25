@@ -32,34 +32,6 @@ async function isValidPrice(order) {
   }
 }
 
-async function payForOrder(order, options) {
-  const transaction = options.transaction;
-  if (order.price === null) {
-    return;
-  }
-  try {
-    let currency, decrement;
-    if (order.isAsk) {
-      currency = currencyConfig.defaultCurrency;
-      decrement = order.price * order.amount;
-    } else {
-      currency = order.currency;
-      decrement = order.amount;
-    }
-    await db.TraderBalance.decrement(["amount"], {
-      by: decrement,
-      where: {
-        id: order.traderId,
-        currency,
-      },
-      transaction,
-    });
-  } catch (err) {
-    throw err;
-  }
-}
-
 export function orderHooks() {
     db.Order.afterValidate(isValidPrice);
-    db.Order.afterCreate(payForOrder);
 }
