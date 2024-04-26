@@ -24,12 +24,6 @@ async function payForTrading(isAskMode = false, askOrder, bidOrder, previousAmou
   const payTransaction = await db.sequelize.transaction();
   
   try {
-    // Pay for buying stock (VND)
-    await db.TraderBalance.decrement("amount", {
-      by: matchOrder.price * amountAdd,
-      transaction: payTransaction,
-      where: { id: askOrder.traderId , currency: currencyConfig.defaultCurrency},
-    });
     // Receive stocks after buying
     await db.TraderBalance.increment("amount", {
       by: amountAdd,
@@ -113,7 +107,6 @@ async function updateMatchAmountAsk(bidOrder, matchOrders, t) {
     lastPrice = matchOrder.price;
   }
   bidOrder.matchAmount = bidOrder.amount - amountLeft;
-  console.log("----------------------------------------");
   if (amountLeft === 0) bidOrder.status = "DONE";
   //Update instrument
   await db.Instrument.update(
@@ -188,6 +181,17 @@ async function matchLimitOrder(order, options) {
   }
 }
 
+async function moveToLog(order, options) {
+  if (order.status === "CANCEL" || order.status === "DONE") {
+    await db.OrdersLog.create({
+      ...order.dataValues
+    }, {
+      transaction: options.transaction
+    })
+  }
+}
+
 export function tradeHooks() {
   db.Order.afterCreate(matchLimitOrder);
+  db.Order.afterUpdate(moveToLog);
 }

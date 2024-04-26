@@ -17,7 +17,6 @@ async function checkBalanceAsk(req, res, next) {
       finalPrice =
         await db.Instrument.findByPk(req.body.currency).lastPrice;
     }
-    console.log(finalPrice * amount, balance)
     if (finalPrice * amount > balance) {
       req.transaction.rollback();
       res.status(402).json({ error: "Not enough money!" });

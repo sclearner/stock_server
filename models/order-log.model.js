@@ -1,7 +1,7 @@
 import orderConfig from "../configs/order.config.js";
 
-export default function (sequelize, DataTypes) {
-  return sequelize.define("order", {
+export function OrdersLogModel(sequelize, DataTypes) {
+  return sequelize.define("orders_log", {
     traderId: {
       type: DataTypes.INTEGER,
     },
@@ -58,5 +58,7 @@ export default function (sequelize, DataTypes) {
       defaultValue: orderConfig.defaultType,
       allowNull: false,
     },
+  }, {
+    freezeTableName: true
   });
 }

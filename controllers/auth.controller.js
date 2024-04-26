@@ -25,7 +25,7 @@ export async function signUpCorp(req, res) {
             await Instrument.create({
                 symbol, 
                 currency: currencyConfig.defaultCurrency,
-                last_price: initPrice || 10000
+                dayPrice: initPrice || 10000
             }, {transaction: t});
             await TraderBalance.create({
                 id: req.trader.id,

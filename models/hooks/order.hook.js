@@ -32,6 +32,16 @@ async function isValidPrice(order) {
   }
 }
 
+async function payForTrading(order, options) {
+  // Pay for buying stock (VND)
+  if (order.isAsk && order.price !== null) await db.TraderBalance.decrement("amount", {
+    by: order.price * order.amount,
+    transaction: options.transaction,
+    where: { id: order.traderId , currency: currencyConfig.defaultCurrency},
+  });
+}
+
 export function orderHooks() {
     db.Order.afterValidate(isValidPrice);
+    db.Order.afterCreate(payForTrading);
 }

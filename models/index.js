@@ -10,6 +10,8 @@ import { TradeModel } from "./trade.model.js";
 import { orderHooks } from "./hooks/order.hook.js";
 import { traderHooks } from "./hooks/trader.hook.js";
 import { tradeHooks } from "./hooks/trade.hook.js";
+import { OrdersLogModel } from "./order-log.model.js";
+
 const sequelize = new Sequelize(config.DB, config.USER, config.PASSWORD, {
   host: config.HOST,
   dialect: config.dialect,
@@ -21,6 +23,7 @@ const RefreshToken = RefreshTokenModel(sequelize, DataTypes);
 const Instrument = InstrumentModel(sequelize, DataTypes);
 const TraderBalance = TraderBalanceModel(sequelize, DataTypes);
 const Order = OrderModel(sequelize, DataTypes);
+const OrdersLog = OrdersLogModel(sequelize, DataTypes);
 const Trade = TradeModel(sequelize, DataTypes);
 class db {
   static sequelize = sequelize;
@@ -31,6 +34,7 @@ class db {
   static TraderBalance = TraderBalance;
   static Order = Order;
   static Trade = Trade;
+  static OrdersLog = OrdersLog;
 }
 
 //Relations
@@ -78,15 +82,15 @@ db.Instrument.hasMany(db.Order, {
   targetKey: "symbol",
 });
 
-db.Trade.belongsTo(db.Order, {
-  foreignKey: "askId",
-  targetKey: "id"
-});
+// db.Trade.belongsTo(db.Order, {
+//   foreignKey: "askId",
+//   targetKey: "id"
+// });
 
-db.Trade.belongsTo(db.Order, {
-  foreignKey: "bidId",
-  targetKey: "id"
-});
+// db.Trade.belongsTo(db.Order, {
+//   foreignKey: "bidId",
+//   targetKey: "id"
+// });
 
 //Hook
 traderHooks();
