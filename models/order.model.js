@@ -58,5 +58,9 @@ export default function (sequelize, DataTypes) {
       defaultValue: orderConfig.defaultType,
       allowNull: false,
     },
+    totalExchange: {
+      type: DataTypes.DECIMAL(20, 2),
+      defaultValue: 0
+    }
   });
 }

@@ -68,7 +68,7 @@ export function signin(req, res) {
         const token = jwt.sign({id: trader.id}, authConfig.secret, {
             algorithm: 'HS256',
             allowInsecureKeySizes: true,
-            expiresIn: 86400
+            expiresIn: 7 * 24 * 3600 
         });
 
         const refreshToken = await RefreshToken.createToken(trader);

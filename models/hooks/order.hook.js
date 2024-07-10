@@ -8,7 +8,7 @@ async function isValidPrice(order) {
     raw: true,
     attributes: [["dayPrice", "price"], "createdAt"],
   }).catch((_err) => ({ price: null, createdAt: null }));
-  if (order.price === null) {
+  if (order.price == null) {
     return;
   }
   if (price === null) throw new Error("Invalid price");

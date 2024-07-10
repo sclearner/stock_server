@@ -11,21 +11,22 @@ import endPoints from "express-list-endpoints";
 import { TraderRouter as traderRouter } from "./routes/trader.route.js";
 import { instrumentRouter } from "./routes/instrument.route.js";
 import { orderRouter } from "./routes/order.route.js";
+import currencyConfig from "./configs/currency.config.js";
 
 
 console.clear();
 
-if (cluster.isPrimary) {
-  for (let i=0; i < os.cpus().length; i++) {
-    cluster.fork();
-  }
+// if (cluster.isPrimary) {
+//   for (let i=0; i < os.cpus().length; i++) {
+//     cluster.fork();
+//   }
 
-  cluster.on('exit', (worker, code, signal) => {
-    console.log(`Worker process ${worker.process.pid} died. Restarting...`);
-    cluster.fork();
-  });
-}
-else {
+//   cluster.on('exit', (worker, code, signal) => {
+//     console.log(`Worker process ${worker.process.pid} died. Restarting...`);
+//     cluster.fork();
+//   });
+// }
+// else {
 
 const app = express();
 const execPromise = util.promisify(exec);
@@ -55,7 +56,14 @@ let dbAuthTry = 0;
 let retryFunction;
 async function dbAuth() {
   await db.sequelize
-    .authenticate()
+    .authenticate().then(
+      async () => {
+      await db.sequelize.sync({force: true});
+      await db.Instrument.create({
+        symbol: currencyConfig.defaultCurrency
+      })
+    }
+  )
     .catch(retryFunction);
 }
 
@@ -100,4 +108,4 @@ app.listen(PORT, () => {
 );
 });
 
-}
+// }

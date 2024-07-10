@@ -3,7 +3,7 @@ import { db } from "../../models/index.js";
 export async function validateOrder(req, res, next) {
     req.transaction = await db.sequelize.transaction();
     try {
-      const order = new db.Order({
+      const orderInfo = {
         traderId: req.traderId,
         amount: req.body.amount,
         currency: req.body.currency,
@@ -11,7 +11,8 @@ export async function validateOrder(req, res, next) {
         price: req.body.price,
         status: req.body.status,
         type: req.body.type || (req.body.price && "LO") || "MP"
-    });
+    }
+      const order = new db.Order(orderInfo);
       await order.validate( {
         transaction: req.transaction
       });

@@ -8,7 +8,13 @@ const updateOption = (t) => ({
   transaction: t,
 });
 
-async function payForTrading(isAskMode = false, askOrder, bidOrder, previousAmountLeft, t) {
+async function payForTrading(
+  isAskMode = false,
+  askOrder,
+  bidOrder,
+  previousAmountLeft,
+  t
+) {
   let amountLeft = previousAmountLeft;
   const matchOrder = isAskMode ? bidOrder : askOrder;
   const orderLeftAmount = matchOrder.amount - matchOrder.matchAmount;
@@ -22,8 +28,15 @@ async function payForTrading(isAskMode = false, askOrder, bidOrder, previousAmou
     amountLeft -= orderLeftAmount;
   }
   const payTransaction = await db.sequelize.transaction();
-  
+
   try {
+    console.log("Start exchange");
+    // Save ask total exchange (VND)
+    askOrder.totalExchange = askOrder.totalExchange + matchOrder.price * amountAdd;
+    await askOrder.save({
+      transaction: payTransaction,
+    });
+
     // Receive stocks after buying
     await db.TraderBalance.increment("amount", {
       by: amountAdd,
@@ -34,35 +47,36 @@ async function payForTrading(isAskMode = false, askOrder, bidOrder, previousAmou
     await db.TraderBalance.decrement("amount", {
       by: amountAdd,
       transaction: payTransaction,
-      where: { id: bidOrder.traderId, currency: bidOrder.currency},
+      where: { id: bidOrder.traderId, currency: bidOrder.currency },
     });
     // BIDDER GET MONEYYYYY
     await db.TraderBalance.increment("amount", {
       by: matchOrder.price * amountAdd,
       transaction: payTransaction,
-      where: { id: bidOrder.traderId, currency: currencyConfig.defaultCurrency },
+      where: {
+        id: bidOrder.traderId,
+        currency: currencyConfig.defaultCurrency,
+      },
     });
     await payTransaction.commit();
     await db.Trade.create(
-    {
-      askId: askOrder.id,
-      bidId: bidOrder.id,
-      amount: amountAdd,
-      price: matchOrder.price,
-    },
-    {
-      transaction: t,
-    }
-  );
-  matchOrder.matchAmount = matchOrder.matchAmount * 1 + amountAdd;
-  }
-  catch (err) {
+      {
+        askId: askOrder.id,
+        bidId: bidOrder.id,
+        amount: amountAdd,
+        price: matchOrder.price,
+      },
+      {
+        transaction: t,
+      }
+    );
+    matchOrder.matchAmount = matchOrder.matchAmount * 1 + amountAdd;
+  } catch (err) {
     await payTransaction.rollback();
-    matchOrder.status = 'CANCEL';
+    matchOrder.status = "CANCEL";
     amountLeft = previousAmountLeft;
   }
   await matchOrder.save(updateOption(t));
-
   return amountLeft;
 }
 
@@ -103,7 +117,13 @@ async function updateMatchAmountAsk(bidOrder, matchOrders, t) {
     if (bidOrder.price !== null && bidOrder.price > matchOrder.price) {
       break;
     }
-    amountLeft = await payForTrading(false, matchOrder, bidOrder, amountLeft, t);
+    amountLeft = await payForTrading(
+      false,
+      matchOrder,
+      bidOrder,
+      amountLeft,
+      t
+    );
     lastPrice = matchOrder.price;
   }
   bidOrder.matchAmount = bidOrder.amount - amountLeft;
@@ -183,11 +203,26 @@ async function matchLimitOrder(order, options) {
 
 async function moveToLog(order, options) {
   if (order.status === "CANCEL" || order.status === "DONE") {
-    await db.OrdersLog.create({
-      ...order.dataValues
-    }, {
-      transaction: options.transaction
-    })
+    await db.OrdersLog.create(
+      {
+        ...order.dataValues,
+      },
+      {
+        transaction: options.transaction,
+      }
+    );
+    if (order.totalExchange < order.amount * order.price && order.isAsk) {
+      await db.TraderBalance.increment("amount",
+        {
+          by: order.amount * order.price - order.totalExchange,
+          transaction: options.transaction,
+          where: {
+            id: order.traderId,
+            currency: currencyConfig.defaultCurrency
+          }
+        },
+      );
+    }
   }
 }
 
