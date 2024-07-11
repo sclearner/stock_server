@@ -11,7 +11,6 @@ import endPoints from "express-list-endpoints";
 import { TraderRouter as traderRouter } from "./routes/trader.route.js";
 import { instrumentRouter } from "./routes/instrument.route.js";
 import { orderRouter } from "./routes/order.route.js";
-import currencyConfig from "./configs/currency.config.js";
 import orderConfig from "./configs/order.config.js";
 import { cancelAllOrder } from "./controllers/order.controller.js";
 import { updateInstruments } from "./controllers/instrument.controller.js";
@@ -85,8 +84,8 @@ setTimeout(() => {
     console.clear();
     await cancelAllOrder();
     await updateInstruments();
-  }, orderConfig.dayLong * 60 * 1000)
-}, updateAt.getTime() + orderConfig.dayLong * 60 * 1000 - Date.now());
+  }, orderConfig.dayLong * 3600 * 1000)
+}, updateAt.getTime() + orderConfig.dayLong * 3600 * 1000 - Date.now());
 }
 catch (e) {
   console.error(e);
