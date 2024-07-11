@@ -101,7 +101,6 @@ async function updateMatchAmountBid(askOrder, matchOrders, t) {
       where: {
         symbol: askOrder.currency,
       },
-      silent: true,
       transaction: t,
     }
   );

@@ -1,5 +1,5 @@
 import express from "express";
-import { getInstruments } from "../controllers/instrument.controller.js";
+import { getInstrumentNames, getInstruments, getInstrument } from "../controllers/instrument.controller.js";
 import { addHeaders } from "../middlewares/auth/addHeaders.js";
 
 const router = express.Router();
@@ -7,5 +7,7 @@ const router = express.Router();
 router.use(addHeaders);
 
 router.route("/").get(getInstruments);
+router.route("/name").get(getInstrumentNames);
+router.route("/:id").get(getInstrument);
 
 export { router as instrumentRouter };
