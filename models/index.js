@@ -11,6 +11,7 @@ import { orderHooks } from "./hooks/order.hook.js";
 import { traderHooks } from "./hooks/trader.hook.js";
 import { tradeHooks } from "./hooks/trade.hook.js";
 import { OrdersLogModel } from "./order-log.model.js";
+import { TimeModel } from "./time.model.js";
 
 const sequelize = new Sequelize(config.DB, config.USER, config.PASSWORD, {
   host: config.HOST,
@@ -25,6 +26,7 @@ const TraderBalance = TraderBalanceModel(sequelize, DataTypes);
 const Order = OrderModel(sequelize, DataTypes);
 const OrdersLog = OrdersLogModel(sequelize, DataTypes);
 const Trade = TradeModel(sequelize, DataTypes);
+const Time = TimeModel(sequelize, DataTypes);
 class db {
   static sequelize = sequelize;
   static Sequelize = Sequelize;
@@ -35,6 +37,7 @@ class db {
   static Order = Order;
   static Trade = Trade;
   static OrdersLog = OrdersLog;
+  static Time = Time;
 }
 
 //Relations

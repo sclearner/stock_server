@@ -4,6 +4,9 @@ export function TraderBalanceModel(sequelize, DataTypes) {
             amount: {
                 type: DataTypes.DECIMAL(20,2),
                 allowNull: false,
+                validate: {
+                    min: 0
+                },
                 defaultValue: 0
             }
         },

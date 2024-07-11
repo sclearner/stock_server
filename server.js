@@ -12,32 +12,26 @@ import { TraderRouter as traderRouter } from "./routes/trader.route.js";
 import { instrumentRouter } from "./routes/instrument.route.js";
 import { orderRouter } from "./routes/order.route.js";
 import currencyConfig from "./configs/currency.config.js";
+import orderConfig from "./configs/order.config.js";
+import { cancelAllOrder } from "./controllers/order.controller.js";
+import { updateInstruments } from "./controllers/instrument.controller.js";
 
 
 console.clear();
 
-// if (cluster.isPrimary) {
-//   for (let i=0; i < os.cpus().length; i++) {
-//     cluster.fork();
-//   }
+if (cluster.isPrimary) {
+  for (let i=0; i < os.cpus().length; i++) {
+    cluster.fork();
+  }
 
-//   cluster.on('exit', (worker, code, signal) => {
-//     console.log(`Worker process ${worker.process.pid} died. Restarting...`);
-//     cluster.fork();
-//   });
-// }
-// else {
+  cluster.on('exit', (worker, code, signal) => {
+    cluster.fork();
+  });
+}
+else {
 
 const app = express();
 const execPromise = util.promisify(exec);
-
-let timeLeft = 0;
-const checkDay = setInterval(
-  async () => {
-    const updateAt = new Date(await db.sequelize.query('SELECT "updatedAt" FROM time'));
-  }, 24 * 60 * 60 * 1000
-)
-
 
 // Middleware
 app.use(cors());
@@ -58,10 +52,9 @@ async function dbAuth() {
   await db.sequelize
     .authenticate().then(
       async () => {
-      await db.sequelize.sync({force: true});
-      await db.Instrument.create({
-        symbol: currencyConfig.defaultCurrency
-      })
+      // await db.sequelize.sync({force: true});
+      // await db.Instrument.create({symbol: currencyConfig.defaultCurrency});
+      // await db.Time.create({time: Date.now()});
     }
   )
     .catch(retryFunction);
@@ -82,6 +75,22 @@ retryFunction = async (err) => {
 };
 
 await dbAuth();
+
+try {
+  const updateAt = new Date(await db.Time.findOne());
+
+setTimeout(() => {
+  setInterval(async () => {
+    await db.Time.update({time: Date.now()}, {where: {}});
+    console.clear();
+    await cancelAllOrder();
+    await updateInstruments();
+  }, orderConfig.dayLong * 60 * 1000)
+}, updateAt.getTime() + orderConfig.dayLong * 60 * 1000 - Date.now());
+}
+catch (e) {
+  console.error(e);
+}
 
 app.get('/', (req, res) => {
   res.sendFile(resolve('index.html'));
@@ -108,4 +117,4 @@ app.listen(PORT, () => {
 );
 });
 
-// }
+}

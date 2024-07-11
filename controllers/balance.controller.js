@@ -32,7 +32,6 @@ export async function getTraderBalance(req, res) {
         else res.status(404).json({error: 'Trader not found'})
     }
     catch (err) {
-        console.log(err);
         res.status(500).json({error: err.message})
     }
 }

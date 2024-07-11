@@ -113,7 +113,6 @@ export async function refreshToken(req, res) {
         return;
     }
     catch (error) {
-        console.log(error);
         return res.status(500).json({error});
     }
 }

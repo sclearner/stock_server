@@ -14,11 +14,6 @@ export function OrdersLogModel(sequelize, DataTypes) {
         isValidAmount: (value) => {
           if (value > orderConfig.maxAmount) return false;
           if (value < orderConfig.minAmount) return false;
-          console.log(
-            Math.floor((value - orderConfig.minAmount) / orderConfig.loc) *
-              orderConfig.loc,
-            value - orderConfig.minAmount
-          );
           if (
             Math.floor((value - orderConfig.minAmount) / orderConfig.loc) *
               orderConfig.loc !==

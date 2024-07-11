@@ -17,3 +17,14 @@ export async function createOrder(req, res) {
       }
     });
 }
+
+export async function cancelAllOrder() {
+  await db.Order.update({
+    status: 'CANCEL'
+  }, {
+    where: {
+      status: 'ACTIVE',
+    },
+    individualHooks: true
+  });
+}

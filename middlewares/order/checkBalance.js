@@ -36,7 +36,6 @@ async function checkBalanceBid(req, res, next) {
         currency: req.body.currency,
       },
     })) ?? { amount: 0 };
-    console.log(amount, req.body.amount);
     if (req.body.amount > amount) {
       req.transaction.rollback();
       res.status(402).json({ err: "Not enough stock!" });
