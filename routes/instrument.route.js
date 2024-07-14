@@ -8,6 +8,6 @@ router.use(addHeaders);
 
 router.route("/").get(getInstruments);
 router.route("/name").get(getInstrumentNames);
-router.route("/:id").get(getInstrument);
+router.route("/:symbol").get(getInstrument);
 
 export { router as instrumentRouter };

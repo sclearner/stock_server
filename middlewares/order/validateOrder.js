@@ -9,7 +9,6 @@ export async function validateOrder(req, res, next) {
         currency: req.body.currency,
         isAsk: req.body.isAsk,
         price: req.body.price,
-        status: req.body.status,
         type: req.body.type || (req.body.price && "LO") || "MP"
     }
       const order = new db.Order(orderInfo);

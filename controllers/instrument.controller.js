@@ -40,7 +40,7 @@ export async function getInstrument(req, res) {
   db.Instrument.findOne({
     raw: true,
     where: {
-      symbol: req.params.id,
+      symbol: req.params.symbol,
       currency: { [Op.ne]: null },
     },
     attributes: ["symbol", "currency", "dayPrice", "currentPrice"],
